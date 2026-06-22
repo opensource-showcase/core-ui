@@ -16,6 +16,6 @@ export const renderMarkdown = (text?: string): { __html: string } => {
     const cleanHtml = DOMPurify.sanitize(rawHtml);
     return { __html: cleanHtml };
   } catch {
-    return { __html: text };
+    return { __html: DOMPurify.sanitize(text) };
   }
 };

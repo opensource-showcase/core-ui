@@ -1,38 +1,33 @@
-import type { EnrichedContribution } from '../types.ts';
+import { Icon } from './Icon.tsx';
 
-export type SortKey = 'newest' | 'oldest' | 'stars' | 'additions';
+const SORT_OPTIONS = [
+  { label: 'Newest', value: 'newest' },
+  { label: 'Oldest', value: 'oldest' },
+  { label: 'Stars', value: 'stars' },
+  { label: 'Additions', value: 'additions' },
+] as const;
+
+export type SortOption = 'newest' | 'oldest' | 'stars' | 'additions';
 
 interface FiltersProps {
   search: string;
   onSearchChange: (value: string) => void;
-  sortBy: SortKey;
-  onSortChange: (value: SortKey) => void;
-  allLanguages: string[];
+  sortBy: SortOption;
+  onSortChange: (value: SortOption) => void;
+  languages: string[];
   selectedLanguage: string | null;
   onLanguageChange: (value: string | null) => void;
+  impactOptions: string[];
   selectedImpact: string | null;
   onImpactChange: (value: string | null) => void;
-  contributions: EnrichedContribution[];
+  visibleCount: number;
+  totalCount: number;
+  onReset: () => void;
 }
 
-function FilterPill({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
+function Chip({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      className={`text-xs px-2.5 py-1 rounded-full font-semibold border cursor-pointer capitalize transition-all ${
-        active
-          ? 'bg-indigo-600 border-indigo-600 text-white dark:bg-indigo-500 dark:border-indigo-500'
-          : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
-      }`}
-    >
+    <button className={active ? 'chip active' : 'chip'} type="button" onClick={onClick}>
       {label}
     </button>
   );
@@ -43,101 +38,61 @@ export function Filters({
   onSearchChange,
   sortBy,
   onSortChange,
-  allLanguages,
+  languages,
   selectedLanguage,
   onLanguageChange,
+  impactOptions,
   selectedImpact,
   onImpactChange,
-  contributions,
+  visibleCount,
+  totalCount,
+  onReset,
 }: FiltersProps) {
-  const hasImpactData = contributions.some((c) => c.impact);
-
   return (
-    <aside className="lg:col-span-1 space-y-6">
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-900 p-6 shadow-sm space-y-6">
-        <h2 className="font-bold text-lg text-slate-900 dark:text-slate-100">Filters &amp; Search</h2>
+    <aside className="control-panel" aria-label="Contribution filters">
+      <div className="search-field">
+        <Icon name="search" />
+        <input value={search} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search projects, PRs, notes..." aria-label="Search contributions" />
+      </div>
 
-        {/* Search Input */}
-        <div className="space-y-2">
-          <label
-            htmlFor="search-input"
-            className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block"
-          >
-            Search
-          </label>
-          <input
-            id="search-input"
-            type="text"
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search PR title, project..."
-            className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
-          />
+      <label className="field-label" htmlFor="sort-contributions">
+        Sort
+      </label>
+      <select id="sort-contributions" value={sortBy} onChange={(event) => onSortChange(event.target.value as SortOption)}>
+        {SORT_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+
+      {languages.length > 0 && (
+        <div className="filter-group">
+          <span className="field-label">Language</span>
+          <Chip active={!selectedLanguage} label="All" onClick={() => onLanguageChange(null)} />
+          {languages.map((language) => (
+            <Chip active={selectedLanguage === language} key={language} label={language} onClick={() => onLanguageChange(language)} />
+          ))}
         </div>
+      )}
 
-        {/* Sort Dropdown */}
-        <div className="space-y-2">
-          <label
-            htmlFor="sort-select"
-            className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block"
-          >
-            Sort By
-          </label>
-          <select
-            id="sort-select"
-            value={sortBy}
-            onChange={(e) => onSortChange(e.target.value as SortKey)}
-            className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="newest">Latest Merged</option>
-            <option value="oldest">Oldest Merged</option>
-            <option value="stars">Stars Count</option>
-            <option value="additions">Code Size Addition</option>
-          </select>
+      {impactOptions.length > 0 && (
+        <div className="filter-group">
+          <span className="field-label">Impact</span>
+          <Chip active={!selectedImpact} label="All" onClick={() => onImpactChange(null)} />
+          {impactOptions.map((impact) => (
+            <Chip active={selectedImpact === impact} key={impact} label={impact} onClick={() => onImpactChange(impact)} />
+          ))}
         </div>
+      )}
 
-        {/* Impact Filter */}
-        {hasImpactData && (
-          <div className="space-y-2">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-              Impact Rating
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {(['all', 'high', 'medium', 'low'] as const).map((impact) => (
-                <FilterPill
-                  key={impact}
-                  label={impact}
-                  active={impact === 'all' ? !selectedImpact : selectedImpact === impact}
-                  onClick={() => onImpactChange(impact === 'all' ? null : impact)}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Language Filter */}
-        {allLanguages.length > 0 && (
-          <div className="space-y-2">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-              Language Focus
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              <FilterPill
-                label="All Languages"
-                active={!selectedLanguage}
-                onClick={() => onLanguageChange(null)}
-              />
-              {allLanguages.map((lang) => (
-                <FilterPill
-                  key={lang}
-                  label={lang}
-                  active={selectedLanguage === lang}
-                  onClick={() => onLanguageChange(lang)}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+      <div className="filter-footer">
+        <span>
+          Showing {visibleCount} of {totalCount}
+        </span>
+        <button type="button" onClick={onReset}>
+          Reset
+        </button>
       </div>
     </aside>
   );

@@ -1,0 +1,88 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-06-22T10:30:00.000Z",
+  "contributor": {
+    "username": "hasithasandunlakshan",
+    "profile_url": "https://github.com/hasithasandunlakshan",
+    "name": "Hasitha Sandun",
+    "bio": "Building developer tools and polished open source experiences.",
+    "location": "Sri Lanka",
+    "website": "https://github.com/opensource-showcase/opensource-showcase",
+    "twitter": "hasithasandun"
+  },
+  "contributions": [
+    {
+      "repo": "opensource-showcase/opensource-showcase",
+      "pr_number": 128,
+      "pr_title": "Add interactive portfolio generation for GitHub Pages",
+      "pr_url": "https://github.com/opensource-showcase/opensource-showcase/pull/128",
+      "pr_body": "Introduces a generated portfolio shell that loads contribution data and presents merged PRs with repository context.",
+      "merged_at": "2026-06-12T09:15:00.000Z",
+      "language": "TypeScript",
+      "repo_stars": 1840,
+      "repo_description": "CLI tool to curate and showcase open source contributions.",
+      "labels": ["feature", "portfolio", "github-pages"],
+      "additions": 1820,
+      "deletions": 240,
+      "files_changed": 18,
+      "showcase": true,
+      "note": "Made generated portfolios easier to publish and share without a custom backend.",
+      "impact": "high",
+      "reviewers": [
+        {
+          "login": "octocat",
+          "avatar_url": "https://github.com/octocat.png"
+        },
+        {
+          "login": "github",
+          "avatar_url": "https://github.com/github.png"
+        }
+      ],
+      "merged_by": "octocat"
+    },
+    {
+      "repo": "vitejs/vite",
+      "pr_number": 20442,
+      "pr_title": "Improve package output configuration for library builds",
+      "pr_url": "https://github.com/vitejs/vite/pull/20442",
+      "pr_body": "Refines build output naming so CDN consumers can rely on predictable bundle paths.",
+      "merged_at": "2026-05-28T14:42:00.000Z",
+      "language": "TypeScript",
+      "repo_stars": 74200,
+      "repo_description": "Next generation frontend tooling.",
+      "labels": ["build", "library-mode"],
+      "additions": 640,
+      "deletions": 118,
+      "files_changed": 9,
+      "showcase": true,
+      "note": "Reduced confusion for downstream package consumers using CDN-hosted builds.",
+      "impact": "medium",
+      "reviewers": [
+        {
+          "login": "vitejs",
+          "avatar_url": "https://github.com/vitejs.png"
+        }
+      ],
+      "merged_by": "vitejs"
+    },
+    {
+      "repo": "markedjs/marked",
+      "pr_number": 3384,
+      "pr_title": "Document safe markdown rendering in browser integrations",
+      "pr_url": "https://github.com/markedjs/marked/pull/3384",
+      "pr_body": "Adds guidance for pairing markdown parsing with sanitization in client-side apps.",
+      "merged_at": "2026-04-02T07:22:00.000Z",
+      "language": "JavaScript",
+      "repo_stars": 34500,
+      "repo_description": "A markdown parser and compiler.",
+      "labels": ["docs", "security"],
+      "additions": 210,
+      "deletions": 38,
+      "files_changed": 4,
+      "showcase": true,
+      "impact": "low",
+      "reviewers": [],
+      "merged_by": "markedjs"
+    }
+  ]
+}

@@ -1,4 +1,6 @@
 import type { Contributor } from '../types.ts';
+import { formatNumber, normalizeTwitter, normalizeWebsite } from '../utils/format.ts';
+import { Icon } from './Icon.tsx';
 
 interface SiteStats {
   prs: number;
@@ -12,83 +14,50 @@ interface HeroProps {
   stats: SiteStats;
 }
 
-function StatCard({ label, value, colorClass }: { label: string; value: string; colorClass?: string }) {
+function Metric({ label, value, tone }: { label: string; value: string | number; tone?: 'green' | 'red' | 'blue' }) {
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-900 bg-white/50 dark:bg-slate-900/50 p-5 shadow-sm backdrop-blur">
-      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-        {label}
-      </span>
-      <span className={`text-3xl font-black tracking-tight mt-1 block ${colorClass ?? ''}`}>
-        {value}
-      </span>
+    <div className={`metric ${tone ? `metric-${tone}` : ''}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
     </div>
   );
 }
 
 export function Hero({ contributor, stats }: HeroProps) {
+  const contributorName = contributor.name || contributor.username;
+
   return (
-    <section className="relative overflow-hidden pt-12 pb-16 border-b border-slate-200 dark:border-slate-900">
-      <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 via-transparent to-pink-500/5 dark:from-indigo-900/10 dark:to-pink-900/10 pointer-events-none" />
+    <section className="hero">
+      <div className="hero-copy">
+        <span className="eyebrow">Open source contribution portfolio</span>
+        <h1>{contributorName}</h1>
+        <p>{contributor.bio || `A curated record of ${contributorName}'s merged open source pull requests.`}</p>
 
-      <div className="max-w-6xl mx-auto px-4 relative">
-        <div className="max-w-3xl">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 mb-6">
-            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            Verified Open Source Portfolio
-          </span>
-
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-4 text-slate-900 dark:text-slate-100">
-            My Open Source Contributions
-          </h1>
-
-          {contributor.bio && (
-            <p className="text-lg text-slate-600 dark:text-slate-400 mb-6 font-medium leading-relaxed">
-              {contributor.bio}
-            </p>
+        <div className="profile-links">
+          <a href={contributor.profile_url} target="_blank" rel="noreferrer">
+            <Icon name="github" />
+            GitHub profile
+          </a>
+          {contributor.website && (
+            <a href={normalizeWebsite(contributor.website)} target="_blank" rel="noreferrer">
+              <Icon name="external" />
+              {contributor.website.replace(/^https?:\/\/(www\.)?/, '')}
+            </a>
           )}
-
-          <div className="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
-            {contributor.location && (
-              <span className="flex items-center gap-1">📍 {contributor.location}</span>
-            )}
-            {contributor.website && (
-              <a
-                href={contributor.website}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline"
-              >
-                🔗 {contributor.website.replace(/^https?:\/\/(www\.)?/, '')}
-              </a>
-            )}
-            {contributor.twitter && (
-              <a
-                href={`https://twitter.com/${contributor.twitter}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline"
-              >
-                🐦 @{contributor.twitter}
-              </a>
-            )}
-          </div>
+          {contributor.twitter && (
+            <a href={`https://twitter.com/${normalizeTwitter(contributor.twitter)}`} target="_blank" rel="noreferrer">
+              @{normalizeTwitter(contributor.twitter)}
+            </a>
+          )}
+          {contributor.location && <span>{contributor.location}</span>}
         </div>
+      </div>
 
-        {/* Stats Summary */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-          <StatCard label="Merged PRs" value={String(stats.prs)} />
-          <StatCard label="Repositories" value={String(stats.repos)} />
-          <StatCard
-            label="Code Additions"
-            value={`+${stats.additions.toLocaleString()}`}
-            colorClass="text-emerald-600 dark:text-emerald-500"
-          />
-          <StatCard
-            label="Code Deletions"
-            value={`-${stats.deletions.toLocaleString()}`}
-            colorClass="text-rose-600 dark:text-rose-500"
-          />
-        </div>
+      <div className="hero-panel" aria-label="Contribution summary">
+        <Metric label="Merged PRs" value={stats.prs} tone="blue" />
+        <Metric label="Repositories" value={stats.repos} />
+        <Metric label="Lines added" value={`+${formatNumber(stats.additions)}`} tone="green" />
+        <Metric label="Lines removed" value={`-${formatNumber(stats.deletions)}`} tone="red" />
       </div>
     </section>
   );
