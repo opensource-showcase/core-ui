@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import { ContributionFeed } from './components/ContributionFeed.tsx';
+import { BuildYoursBanner } from './components/BuildYoursBanner.tsx';
 import { Filters, type SortOption } from './components/Filters.tsx';
 import { Hero } from './components/Hero.tsx';
 import { Navbar } from './components/Navbar.tsx';
@@ -143,7 +144,7 @@ export default function App() {
       <main>
         <Hero contributor={data.contributor} stats={stats} />
 
-        <section className="content-grid">
+        <section className="content-section">
           <Filters
             search={search}
             onSearchChange={setSearch}
@@ -170,9 +171,11 @@ export default function App() {
         </section>
       </main>
 
+      <BuildYoursBanner />
+
       <footer className="site-footer">
         <span>Updated {new Date(data.updated_at).toLocaleDateString('en-US', { dateStyle: 'long' })}</span>
-        <a href="contributions.json">View contribution data</a>
+        <span>© {new Date().getFullYear()} {data.contributor.name || data.contributor.username} · All rights reserved</span>
       </footer>
     </div>
   );
