@@ -1,7 +1,7 @@
 {
-  "name": "core-ui",
-  "private": true,
-  "version": "0.0.0",
+  "name": "opensource-showcase-ui",
+  "version": "1.0.0",
+  "private": false,
   "type": "module",
   "scripts": {
     "dev": "vite",
