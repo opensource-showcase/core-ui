@@ -32,14 +32,13 @@ export function ContributionFeed({ groups, filesChanged, expandedPRs, onTogglePR
           </button>
         </div>
       ) : (
-        groups.map(([repo, prList]) => {
+        groups.map(([repo, prList], index) => {
           const firstPr = prList[0];
-          const [owner] = repo.split('/');
 
           return (
             <article className="repo-card" key={repo}>
               <header className="repo-header">
-                <img src={`https://github.com/${owner}.png`} alt={owner} />
+                <span className="entry-number">{index + 1}</span>
                 <div>
                   <a href={`https://github.com/${repo}`} target="_blank" rel="noreferrer">
                     {repo}

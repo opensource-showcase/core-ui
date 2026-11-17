@@ -35,9 +35,10 @@ export function Navbar({ contributor, darkMode, onToggleDarkMode }: NavbarProps)
             className="icon-button"
             type="button"
             onClick={onToggleDarkMode}
-            aria-label="Toggle theme"
+            aria-label={`Switch to ${darkMode ? 'Cream' : 'Classic'} paper`}
+            title="Change paper tone"
           >
-            <Icon name={darkMode ? 'sun' : 'moon'} />
+            <span>Cream / Classic · {darkMode ? 'Classic' : 'Cream'}</span>
           </button>
         </nav>
       </div>

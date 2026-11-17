@@ -11,8 +11,11 @@ export default defineConfig({
     cssInjectedByJsPlugin(),
   ],
   build: {
+    // Keep handwriting available when the UI bundle is served from a CDN.
+    assetsInlineLimit: 300000,
     // Generate a single JS file and no CSS file (CSS inlined into JS)
     rollupOptions: {
+      input: "notebook.html",
       output: {
         entryFileNames: 'showcase-ui.js',
         assetFileNames: '[name].[ext]',

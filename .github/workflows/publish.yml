@@ -1,6 +1,7 @@
 name: Publish to npm & purge CDN
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
 
@@ -11,10 +12,11 @@ concurrency:
 
 jobs:
   publish:
+    environment: npm-production
     runs-on: ubuntu-latest
     permissions:
       contents: write   # to push version bump commit
-      id-token: write   # for npm provenance
+      id-token: write   # for npm trusted publishing and provenance
 
     steps:
       - name: Checkout
@@ -24,47 +26,84 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Verify publishing runtime
+        run: |
+          node --version
+          npm --version
+
+      - name: Check npm token authentication
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN is missing. Add it to this repository or its npm-production environment."
+            exit 1
+          fi
+          npm whoami --registry=https://registry.npmjs.org
+          echo "Token authentication succeeded. Package write access is checked by npm during publishing."
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build
         run: npm run build
 
-      - name: Check if version changed
-        id: version_check
+      - name: Select and commit a fresh release version
+        shell: bash
         run: |
-          LOCAL_VERSION=$(node -p "require('./package.json').version")
-          NPM_VERSION=$(npm view opensource-showcase-ui version 2>/dev/null || echo "0.0.0")
-          echo "local=$LOCAL_VERSION" >> "$GITHUB_OUTPUT"
-          echo "npm=$NPM_VERSION" >> "$GITHUB_OUTPUT"
-          if [ "$LOCAL_VERSION" != "$NPM_VERSION" ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      # Auto-bump patch if version hasn't been manually bumped
-      - name: Auto-bump version
-        if: steps.version_check.outputs.changed == 'false'
-        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PUBLISHED_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json --registry=https://registry.npmjs.org)
+          export PUBLISHED_VERSIONS
+          NEXT_VERSION=$(node --input-type=commonjs -e '
+            const local = require("./package.json").version;
+            const published = JSON.parse(process.env.PUBLISHED_VERSIONS);
+            const versions = [local, ...[].concat(published)]
+              .filter(v => /^\d+\.\d+\.\d+$/.test(v))
+              .map(v => v.split(".").map(Number))
+              .sort((a, b) => b[0] - a[0] || b[1] - a[1] || b[2] - a[2]);
+            const [major, minor, patch] = versions[0];
+            console.log(`${major}.${minor}.${patch + 1}`);
+          ')
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          npm version patch -m "chore: release v%s [skip ci]"
+          npm version "$NEXT_VERSION" -m "chore: release v%s [skip ci]"
           git push --follow-tags
 
       - name: Rebuild after version bump
-        if: steps.version_check.outputs.changed == 'false'
         run: npm run build
 
+      # NPM_TOKEN must have publishing access to this package.
+      # OIDC remains available if a matching Trusted Publisher is configured.
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --registry=https://registry.npmjs.org --dry-run=false
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify published version on npm
+        shell: bash
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          for attempt in 1 2 3 4 5 6; do
+            if PUBLISHED_VERSION=$(npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version --registry=https://registry.npmjs.org); then
+              if [ "$PUBLISHED_VERSION" = "$PACKAGE_VERSION" ]; then
+                echo "Verified $PACKAGE_NAME@$PACKAGE_VERSION is publicly available."
+                exit 0
+              fi
+            fi
+            if [ "$attempt" -lt 6 ]; then
+              sleep 10
+            fi
+          done
+          echo "::error::$PACKAGE_NAME@$PACKAGE_VERSION is not available on npm after publishing. Check the publish step result and npm authorization; provenance signing alone is not publication."
+          exit 1
 
       - name: Purge jsDelivr cache
         run: |

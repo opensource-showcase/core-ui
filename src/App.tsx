@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import { ContributionFeed } from './components/ContributionFeed.tsx';
-import { BuildYoursBanner } from './components/BuildYoursBanner.tsx';
+import { NotebookDiagram } from './components/NotebookDiagram.tsx';
 import { Filters, type SortOption } from './components/Filters.tsx';
-import { Hero } from './components/Hero.tsx';
+import { DeveloperProfile, Hero } from './components/Hero.tsx';
 import { Navbar } from './components/Navbar.tsx';
 import { StateScreen } from './components/StateScreen.tsx';
 import type { ContributionsData, EnrichedContribution } from './types.ts';
@@ -17,10 +17,7 @@ declare global {
 function getInitialTheme() {
   if (typeof window === 'undefined') return false;
 
-  return (
-    localStorage.getItem('theme') === 'dark' ||
-    (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  );
+  return localStorage.getItem('notebook-theme') === 'classic';
 }
 
 function groupByRepository(contributions: EnrichedContribution[]) {
@@ -45,8 +42,8 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('notebook-theme', darkMode ? 'classic' : 'cream');
   }, [darkMode]);
 
   useEffect(() => {
@@ -123,7 +120,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className={`showcase-shell ${darkMode ? 'dark' : ''}`}>
+      <div className={`showcase-shell ${darkMode ? 'classic' : ''}`}>
         <StateScreen loading title="Loading portfolio" description="Collecting contribution details." />
       </div>
     );
@@ -131,18 +128,22 @@ export default function App() {
 
   if (error || !data) {
     return (
-      <div className={`showcase-shell ${darkMode ? 'dark' : ''}`}>
+      <div className={`showcase-shell ${darkMode ? 'classic' : ''}`}>
         <StateScreen title="Could not load contributions" description={error || 'The contributions.json file could not be found.'} code="opensource-showcase" />
       </div>
     );
   }
 
   return (
-    <div className={`showcase-shell ${darkMode ? 'dark' : ''}`}>
+    <div className={`showcase-shell ${darkMode ? 'classic' : ''}`}>
       <Navbar contributor={data.contributor} darkMode={darkMode} onToggleDarkMode={() => setDarkMode((value) => !value)} />
 
-      <main>
+      <div className="notebook-layout">
+        <DeveloperProfile contributor={data.contributor} />
+        <main>
         <Hero contributor={data.contributor} stats={stats} />
+
+        <NotebookDiagram />
 
         <section className="content-section">
           <Filters
@@ -169,9 +170,10 @@ export default function App() {
             onReset={resetFilters}
           />
         </section>
-      </main>
+        </main>
+      </div>
 
-      <BuildYoursBanner />
+
 
       <footer className="site-footer">
         <span>Updated {new Date(data.updated_at).toLocaleDateString('en-US', { dateStyle: 'long' })}</span>
