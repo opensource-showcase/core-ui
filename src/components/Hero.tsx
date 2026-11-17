@@ -10,7 +10,6 @@ interface SiteStats {
 }
 
 interface HeroProps {
-  contributor: Contributor;
   stats: SiteStats;
 }
 
@@ -39,20 +38,16 @@ export function DeveloperProfile({ contributor }: { contributor: Contributor }) 
         {contributor.twitter && <a href={`https://twitter.com/${normalizeTwitter(contributor.twitter)}`} target="_blank" rel="noreferrer">@{normalizeTwitter(contributor.twitter)}</a>}
         {contributor.email && <a href={`mailto:${contributor.email}`}>{contributor.email}</a>}
       </div>
-      <p className="developer-caption">My open source notebook<br />Projects, pull requests & contributions →</p>
     </aside>
   );
 }
 
-export function Hero({ contributor, stats }: HeroProps) {
-  const contributorName = contributor.name || contributor.username;
+export function Hero({ stats }: HeroProps) {
 
   return (
     <section className="hero">
       <div className="hero-copy">
-        <span className="eyebrow">{contributorName}'s notebook</span>
         <h1>Open source contributions</h1>
-        <p>A record of merged pull requests, project improvements and work shared with the open source community.</p>
       </div>
       <div className="hero-panel" aria-label="Contribution summary">
         <Metric label="Merged PRs" value={stats.prs} tone="blue" />

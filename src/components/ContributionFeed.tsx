@@ -15,7 +15,6 @@ export function ContributionFeed({ groups, filesChanged, expandedPRs, onTogglePR
     <section className="contribution-feed" aria-label="Open source contributions">
       <div className="feed-header">
         <div>
-          <span className="eyebrow">Contribution feed</span>
           <h2>{groups.length} active project{groups.length === 1 ? '' : 's'}</h2>
         </div>
         <span>

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import { ContributionFeed } from './components/ContributionFeed.tsx';
-import { NotebookDiagram } from './components/NotebookDiagram.tsx';
 import { Filters, type SortOption } from './components/Filters.tsx';
 import { DeveloperProfile, Hero } from './components/Hero.tsx';
 import { Navbar } from './components/Navbar.tsx';
@@ -136,14 +135,12 @@ export default function App() {
 
   return (
     <div className={`showcase-shell ${darkMode ? 'classic' : ''}`}>
-      <Navbar contributor={data.contributor} darkMode={darkMode} onToggleDarkMode={() => setDarkMode((value) => !value)} />
+      <Navbar darkMode={darkMode} onToggleDarkMode={() => setDarkMode((value) => !value)} />
 
       <div className="notebook-layout">
         <DeveloperProfile contributor={data.contributor} />
         <main>
-        <Hero contributor={data.contributor} stats={stats} />
-
-        <NotebookDiagram />
+        <Hero stats={stats} />
 
         <section className="content-section">
           <Filters
