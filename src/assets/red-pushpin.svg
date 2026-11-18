@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 88" fill="none">
+ <defs>
+  <linearGradient id="steel" x1="27" y1="54" x2="37" y2="57" gradientUnits="userSpaceOnUse"><stop stop-color="#69727A"/><stop offset=".35" stop-color="#FFFFFF"/><stop offset=".6" stop-color="#C9CDD0"/><stop offset="1" stop-color="#646A70"/></linearGradient>
+  <linearGradient id="red" x1="20" y1="13" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#EE4D57"/><stop offset=".35" stop-color="#D51625"/><stop offset=".75" stop-color="#AA0010"/><stop offset="1" stop-color="#73000B"/></linearGradient>
+  <linearGradient id="rim" x1="16" y1="35" x2="51" y2="57" gradientUnits="userSpaceOnUse"><stop stop-color="#EF656B"/><stop offset=".35" stop-color="#CD1221"/><stop offset="1" stop-color="#95000C"/></linearGradient>
+  <linearGradient id="top" x1="18" y1="6" x2="51" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#F34350"/><stop offset=".5" stop-color="#D71929"/><stop offset="1" stop-color="#AC0013"/></linearGradient>
+ </defs>
+ <g transform="rotate(34 36 43)">
+  <path d="M32 50H40L36 84Z" fill="url(#steel)" stroke="#737A80" stroke-width=".5"/>
+  <ellipse cx="36" cy="46" rx="25" ry="11" fill="#87000B"/>
+  <ellipse cx="36" cy="42" rx="25" ry="13" fill="url(#rim)" stroke="#B90616"/>
+  <path d="M25 14H47L45 34Q45 38 54 40Q49 47 36 47Q22 47 18 40Q27 38 27 34Z" fill="url(#red)"/>
+  <path d="M27 19L30 20V34Q30 38 24 41" stroke="#FFACAF" stroke-opacity=".6" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="36" cy="15" rx="24" ry="10" fill="#99000E"/>
+  <ellipse cx="36" cy="11" rx="24" ry="10" fill="url(#top)" stroke="#CA0C1D"/>
+  <path d="M17 8Q21 16 45 18" stroke="#FFD0D1" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>
+  <path d="M15 41Q18 50 40 51" stroke="#FF8E96" stroke-width="2" stroke-linecap="round" opacity=".6"/>
+ </g>
+</svg>

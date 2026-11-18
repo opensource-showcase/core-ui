@@ -1,6 +1,11 @@
 @import "tailwindcss";
-@font-face { font-family: 'Notebook Hand'; src: url('./assets/PatrickHand-Regular.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Notebook Heading'; src: url('./assets/Kalam-Regular.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Notebook Heading'; src: url('./assets/Kalam-Bold.ttf') format('truetype'); font-style: normal; font-weight: 700; font-display: swap; }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: 'Notebook Hand', 'Chalkboard SE', cursive; }
-button, input, select, code, pre { font: inherit; }
+html, body, #root { margin: 0; min-height: 100%; width: 100%; }
+body { font-family: 'Notebook Heading', cursive; font-weight: 400; }
+button, input, select, textarea, code, pre { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
+
+@font-face { font-family: 'Field Sans'; src: url('./assets/DMSans.ttf') format('truetype'); font-style: normal; font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Field Mono'; src: url('./assets/DMMono-Regular.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: swap; }

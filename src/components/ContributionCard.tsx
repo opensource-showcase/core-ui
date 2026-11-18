@@ -1,41 +1,47 @@
+import { useId } from 'react';
 import type { EnrichedContribution } from '../types.ts';
 import { formatDate, formatFullNumber } from '../utils/format.ts';
 import { renderMarkdown } from '../utils/markdown.ts';
 import { Icon } from './Icon.tsx';
 
 interface ContributionCardProps {
+  number: number;
   contribution: EnrichedContribution;
   expanded: boolean;
   onToggleExpanded: () => void;
 }
 
-export function ContributionCard({ contribution: pr, expanded, onToggleExpanded }: ContributionCardProps) {
+export function ContributionCard({ number, contribution: pr, expanded, onToggleExpanded }: ContributionCardProps) {
+  const detailsId = useId();
   const reviewers = pr.reviewers?.slice(0, 5) ?? [];
 
   return (
     <section className="pr-item">
       <div className="pr-main">
-        <div className="branch-mark">
-          <Icon name="branch" />
-        </div>
-
         <div className="pr-content">
-          <div className="pr-title-row">
-            <a href={pr.pr_url} target="_blank" rel="noreferrer">
-              {pr.pr_title}
-            </a>
-            <span>#{pr.pr_number}</span>
-            {pr.impact && <strong className={`impact impact-${pr.impact}`}>{pr.impact}</strong>}
-          </div>
-
+          <button className="pr-expand-trigger" type="button" onClick={onToggleExpanded}
+            aria-expanded={expanded} aria-controls={detailsId}>
+            <span className="pr-entry-number">{number}.</span>
+            <span className="pr-collapsed-title">{pr.pr_title}</span>
+            <span className="pr-collapsed-number">#{pr.pr_number}</span>
+            <Icon name="chevron" />
+          </button>
+          <div id={detailsId} className="description-reveal pr-details-reveal" data-expanded={expanded}
+            aria-hidden={!expanded} inert={!expanded}>
+            <div className="description-reveal-inner">
+              <div className="pr-expanded-content">
+                <div className="pr-reference">
+                  <a href={pr.pr_url} target="_blank" rel="noreferrer"><Icon name="merge" /> View merged PR #{pr.pr_number} ↗</a>
+                  {pr.impact && <span className="impact">{pr.impact} impact</span>}
+                </div>
           <div className="pr-subline">
-            <span>Merged {formatDate(pr.merged_at)}</span>
-            {pr.language && <span>{pr.language}</span>}
+            <span className="pr-merged-date"><Icon name="calendar" /> Merged {formatDate(pr.merged_at)}</span>
+            {pr.language && <span className="pr-language"><Icon name="code" /> {pr.language}</span>}
             <span>
-              {pr.files_changed} file{pr.files_changed === 1 ? '' : 's'}
+              <Icon name="file" /> {pr.files_changed} file{pr.files_changed === 1 ? '' : 's'}
             </span>
-            <span className="diff-add">+{formatFullNumber(pr.additions)}</span>
-            <span className="diff-del">-{formatFullNumber(pr.deletions)}</span>
+            <span className="diff-add">+{formatFullNumber(pr.additions)} added</span>
+            <span className="diff-del">−{formatFullNumber(pr.deletions)} removed</span>
           </div>
 
           {pr.note && <p className="impact-note">{pr.note}</p>}
@@ -68,14 +74,11 @@ export function ContributionCard({ contribution: pr, expanded, onToggleExpanded 
           </div>
 
           {pr.pr_body?.trim() && (
-            <div className="description-block">
-              <button type="button" onClick={onToggleExpanded} aria-expanded={expanded}>
-                {expanded ? 'Hide description' : 'Read description'}
-                <Icon name="chevron" />
-              </button>
-              {expanded && <div className="markdown-content" dangerouslySetInnerHTML={renderMarkdown(pr.pr_body)} />}
-            </div>
+            <div className="markdown-content" dangerouslySetInnerHTML={renderMarkdown(pr.pr_body)} />
           )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -15,81 +15,81 @@ interface FiltersProps {
   onSearchChange: (value: string) => void;
   sortBy: SortOption;
   onSortChange: (value: SortOption) => void;
-  languages: string[];
-  selectedLanguage: string | null;
-  onLanguageChange: (value: string | null) => void;
-  impactOptions: string[];
-  selectedImpact: string | null;
-  onImpactChange: (value: string | null) => void;
+  projects: string[];
+  selectedProject: string;
+  onProjectChange: (value: string) => void;
   visibleCount: number;
   totalCount: number;
   onReset: () => void;
 }
 
-function Chip({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
+function Dropdown<T extends string>({ value, onChange, options, label, icon }: {
+  value: T;
+  onChange: (value: T) => void;
+  options: ReadonlyArray<{ label: string; value: T }>;
   label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button className={active ? 'chip active' : 'chip'} type="button" onClick={onClick}>
-      {label}
-    </button>
-  );
-}
-
-function SortDropdown({
-  value,
-  onChange,
-}: {
-  value: SortOption;
-  onChange: (v: SortOption) => void;
+  icon: 'sort' | 'book';
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const current = SORT_OPTIONS.find((o) => o.value === value)!;
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const current = options.find(option => option.value === value) ?? options[0];
 
   useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    function closeOutside(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
     }
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('mousedown', closeOutside);
+    return () => document.removeEventListener('mousedown', closeOutside);
   }, []);
 
   return (
-    <div className="sort-dropdown" ref={ref}>
-      <button
-        type="button"
-        className="sort-trigger"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <Icon name="sort" />
-        <span>{current.label}</span>
-        <Icon name="chevron-down" />
+    <div className="sort-dropdown" ref={ref} onBlur={event => {
+      if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+    }} onKeyDown={event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    }}>
+      <button ref={triggerRef} type="button" className="sort-trigger"
+        aria-label={label + ': ' + current?.label} aria-haspopup="listbox" aria-expanded={open}
+        onClick={() => setOpen(previous => !previous)}
+        onKeyDown={event => {
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            setOpen(true);
+          }
+        }}>
+        <Icon name={icon} /><span>{current?.label}</span><Icon name="chevron-down" />
       </button>
-
       {open && (
-        <ul className="sort-menu" role="listbox" aria-label="Sort contributions">
-          {SORT_OPTIONS.map((option) => (
-            <li
-              key={option.value}
-              role="option"
-              aria-selected={option.value === value}
-              className={option.value === value ? 'sort-option selected' : 'sort-option'}
-              onClick={() => {
-                onChange(option.value);
-                setOpen(false);
-              }}
-            >
-              {option.value === value && <Icon name="check" />}
-              {option.label}
+        <ul className="sort-menu" role="listbox" aria-label={label} onKeyDown={event => {
+          const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="option"]'));
+          const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+          let next = index;
+          if (event.key === 'ArrowDown') next = (index + 1) % buttons.length;
+          else if (event.key === 'ArrowUp') next = (index - 1 + buttons.length) % buttons.length;
+          else if (event.key === 'Home') next = 0;
+          else if (event.key === 'End') next = buttons.length - 1;
+          else return;
+          event.preventDefault();
+          buttons[next]?.focus();
+        }}>
+          {options.map(option => (
+            <li key={option.value} role="presentation">
+              <button type="button" role="option" aria-selected={option.value === value}
+                autoFocus={option.value === value}
+                className={option.value === value ? 'sort-option selected' : 'sort-option'}
+                onClick={() => {
+                  onChange(option.value);
+                  setOpen(false);
+                  triggerRef.current?.focus();
+                }}>
+                <span className="option-check">{option.value === value && <Icon name="check" />}</span>
+                {option.label}
+              </button>
             </li>
           ))}
         </ul>
@@ -103,17 +103,14 @@ export function Filters({
   onSearchChange,
   sortBy,
   onSortChange,
-  languages,
-  selectedLanguage,
-  onLanguageChange,
-  impactOptions,
-  selectedImpact,
-  onImpactChange,
+  projects,
+  selectedProject,
+  onProjectChange,
   visibleCount,
   totalCount,
   onReset,
 }: FiltersProps) {
-  const hasActiveFilters = !!search || !!selectedLanguage || !!selectedImpact || sortBy !== 'newest';
+  const hasActiveFilters = !!search || !!selectedProject || sortBy !== 'newest';
 
   return (
     <div className="filter-bar" aria-label="Contribution filters">
@@ -139,7 +136,11 @@ export function Filters({
           )}
         </div>
 
-        <SortDropdown value={sortBy} onChange={onSortChange} />
+        <Dropdown value={selectedProject} onChange={onProjectChange}
+          options={[{ label: 'All projects', value: '' }, ...projects.map(project => ({ label: project, value: project }))]}
+          label="Filter by project" icon="book" />
+        <Dropdown value={sortBy} onChange={onSortChange} options={SORT_OPTIONS}
+          label="Sort contributions" icon="sort" />
 
         {hasActiveFilters && (
           <button type="button" className="reset-btn" onClick={onReset}>
@@ -148,46 +149,9 @@ export function Filters({
         )}
       </div>
 
-      {/* Row 2 — chip filters (only when options exist) */}
-      {(languages.length > 0 || impactOptions.length > 0) && (
-        <div className="filter-row-chips">
-          {languages.length > 0 && (
-            <div className="chip-group">
-              <span className="chip-group-label">Language</span>
-              <Chip active={!selectedLanguage} label="All" onClick={() => onLanguageChange(null)} />
-              {languages.map((lang) => (
-                <Chip
-                  key={lang}
-                  active={selectedLanguage === lang}
-                  label={lang}
-                  onClick={() => onLanguageChange(lang)}
-                />
-              ))}
-            </div>
-          )}
-
-          {impactOptions.length > 0 && (
-            <div className="chip-group">
-              <span className="chip-group-label">Impact</span>
-              <Chip active={!selectedImpact} label="All" onClick={() => onImpactChange(null)} />
-              {impactOptions.map((impact) => (
-                <Chip
-                  key={impact}
-                  active={selectedImpact === impact}
-                  label={impact}
-                  onClick={() => onImpactChange(impact)}
-                />
-              ))}
-            </div>
-          )}
-
-          <span className="filter-count">
-            {visibleCount === totalCount
-              ? `${totalCount} contributions`
-              : `${visibleCount} of ${totalCount}`}
-          </span>
-        </div>
-      )}
+      <span className="filter-count">
+        {visibleCount === totalCount ? `${totalCount} contributions` : `${visibleCount} of ${totalCount}`}
+      </span>
     </div>
   );
 }

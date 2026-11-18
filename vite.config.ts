@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   build: {
     // Keep handwriting available when the UI bundle is served from a CDN.
-    assetsInlineLimit: 300000,
+    assetsInlineLimit: 2000000,
     // Generate a single JS file and no CSS file (CSS inlined into JS)
     rollupOptions: {
       input: "notebook.html",
